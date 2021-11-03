@@ -3,3 +3,4 @@ target/
 
 .vscode
 src/vga_buffer.rs
+qemu.log

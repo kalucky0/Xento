@@ -1,9 +1,8 @@
 use super::terminal::parse_command;
-use crate::logger::Logger;
+use crate::logger::{LockedLogger, LOGGER};
 use crate::serial_println;
 use alloc::string::{String, ToString};
 use alloc::vec::Vec;
-use bootloader::boot_info::{FrameBufferInfo, FrameBuffer, Optional};
 use conquer_once::spin::OnceCell;
 use core::{
     pin::Pin,
@@ -70,6 +69,26 @@ impl Stream for ScancodeStream {
     }
 }
 
+fn print_char(l: &LockedLogger, s: char) {
+    let mut logger = l.lock();
+    logger.write_char(s);
+}
+
+fn print_string(l: &LockedLogger, s: &str) {
+    let mut logger = l.lock();
+    logger.write_string(s);
+}
+
+fn remove_last(l: &LockedLogger) {
+    let mut logger = l.lock();
+    logger.remove_last(1);
+}
+
+fn clear_row(l: &LockedLogger, cmd: String) {
+    let mut logger = l.lock();
+    logger.remove_last(cmd.len());
+}
+
 pub async fn print_keypresses() {
     let mut scancodes = ScancodeStream::new();
     let mut keyboard = Keyboard::new(layouts::Us104Key, ScancodeSet1, HandleControl::Ignore);
@@ -78,45 +97,49 @@ pub async fn print_keypresses() {
     let mut prev_commands = Vec::from(["".to_string()]);
     let mut selected_command = 0;
 
-    while let Some(scancode) = scancodes.next().await {
-        if let Ok(Some(key_event)) = keyboard.add_byte(scancode) {
-            if let Some(key) = keyboard.process_keyevent(key_event) {
-                match key {
-                    DecodedKey::Unicode(character) => {
-                        /*if character as u8 == 8 {
-                            remove_last!(1);
-                            print!(" ");
-                            remove_last!(1);
-                            current_command.pop();
-                        } else if character as u8 == 10 {
-                            let cmds = current_command.split(';');
-                            println!("");
-                            for cmd in cmds {
-                                print!("{}", parse_command(cmd.to_string()));
+    if let Some(logger) = LOGGER.get() {
+        while let Some(scancode) = scancodes.next().await {
+            if let Ok(Some(key_event)) = keyboard.add_byte(scancode) {
+                if let Some(key) = keyboard.process_keyevent(key_event) {
+                    match key {
+                        DecodedKey::Unicode(character) => {
+                            if character as u8 == 8 {
+                                if current_command.len() > 0 {
+                                    remove_last(logger);
+                                    current_command.pop();
+                                }
+                            } else if character as u8 == 10 {
+                                let cmds = current_command.split(';');
+                                print_char(logger, '\n');
+                                for cmd in cmds {
+                                    let result: &str = &parse_command(cmd.to_string());
+                                    print_string(logger, result);
+                                }
+                                print_string(logger, "\n > ");
+                                prev_commands.insert(0, current_command.clone());
+                                current_command = String::from("");
+                            } else {
+                                current_command += &character.to_string();
+                                print_char(logger, character);
                             }
-                            print!("\n > ");
-                            prev_commands.insert(0, current_command.clone());
-                            current_command = String::from("");
-                        } else {
-                            current_command += &character.to_string();
-                            print!("{}", character);
-                        }*/
-                    }
-                    DecodedKey::RawKey(key) => {
-                        /*if key == KeyCode::ArrowUp && selected_command < prev_commands.len() - 1 {
-                            if current_command != "" {
-                                selected_command += 1;
+                        }
+                        DecodedKey::RawKey(key) => {
+                            if key == KeyCode::ArrowUp && selected_command < prev_commands.len() - 1
+                            {
+                                if current_command != "" {
+                                    selected_command += 1;
+                                }
+                                clear_row(logger, current_command);
+                                current_command = prev_commands.get(selected_command).unwrap().clone();
+                                print_string(logger, current_command.as_str());
+                            } else if key == KeyCode::ArrowDown && selected_command >= 1 {
+                                selected_command -= 1;
+                                clear_row(logger, current_command);
+                                current_command = prev_commands.get(selected_command).unwrap().clone();
+                                print_string(logger, current_command.as_str());
+                            } else {
                             }
-                            current_command = prev_commands.get(selected_command).unwrap().clone();
-                            clear_current_row!();
-                            print!(" > {}", current_command);
-                        } else if key == KeyCode::ArrowDown && selected_command >= 1 {
-                            selected_command -= 1;
-                            current_command = prev_commands.get(selected_command).unwrap().clone();
-                            clear_current_row!();
-                            print!(" > {}", current_command);
-                        } else {
-                        }*/
+                        }
                     }
                 }
             }

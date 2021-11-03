@@ -3,7 +3,7 @@ use std::{
     process::Command,
 };
 
-const RUN_ARGS: &[&str] = &["--no-reboot", "-s"];
+const RUN_ARGS: &[&str] = &["--no-reboot", "-s", "-d", "int,cpu_reset,guest_errors", "-D", "qemu.log"];
 
 fn main() {
     let mut args = std::env::args().skip(1); // skip executable name

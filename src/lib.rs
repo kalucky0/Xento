@@ -3,9 +3,11 @@
 #![feature(abi_x86_interrupt)]
 #![feature(alloc_error_handler)]
 #![feature(const_mut_refs)]
+#![feature(asm)]
 
 extern crate alloc;
 use core::panic::PanicInfo;
+use bootloader::boot_info::{FrameBufferInfo};
 
 pub mod allocator;
 pub mod gdt;
@@ -16,7 +18,8 @@ pub mod task;
 pub mod logger;
 
 pub fn init() {
-    gdt::init();
+    // GDT initialization causes double fault so it's commented out for now
+    // gdt::init();
     interrupts::init_idt();
     unsafe { interrupts::PICS.lock().initialize() };
     x86_64::instructions::interrupts::enable();
@@ -42,6 +45,19 @@ pub fn hlt_loop() -> ! {
     loop {
         x86_64::instructions::hlt();
     }
+}
+
+pub fn init_logger(framebuffer: &'static mut [u8], info: FrameBufferInfo) -> &logger::LockedLogger {
+    let logger = logger::LOGGER.get_or_init(move || logger::LockedLogger::new(framebuffer, info));
+    log::set_logger(logger).expect("logger already set");
+    log::set_max_level(log::LevelFilter::Trace);
+    logger
+}
+
+#[panic_handler]
+fn panic(info: &PanicInfo) -> ! {
+    serial_print!("{}", info);
+    hlt_loop();
 }
 
 #[alloc_error_handler]

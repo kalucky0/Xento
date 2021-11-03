@@ -1,25 +1,60 @@
 use bootloader::boot_info::{FrameBufferInfo, PixelFormat};
+use conquer_once::spin::OnceCell;
 use core::{
     fmt::{self, Write},
     ptr,
 };
 use font8x8::UnicodeFonts;
+use spinning_top::{Spinlock, RawSpinlock};
+
+pub static LOGGER: OnceCell<LockedLogger> = OnceCell::uninit();
+pub struct LockedLogger(Spinlock<Logger>);
 
 /// Additional vertical space between lines
 const LINE_SPACING: usize = 0;
 /// Additional vertical space between separate log messages
 const LOG_SPACING: usize = 2;
 
-/// Allows logging text to a pixel-based framebuffer.
+impl LockedLogger {
+    pub fn new(framebuffer: &'static mut [u8], info: FrameBufferInfo) -> Self {
+        LockedLogger(Spinlock::new(Logger::new(framebuffer, info)))
+    }
+
+    pub fn lock(&self) -> spinning_top::lock_api::MutexGuard<'_, RawSpinlock, Logger> {
+        self.0.lock()
+    }
+
+    pub unsafe fn force_unlock(&self) {
+        self.0.force_unlock();
+    }
+}
+
+impl log::Log for LockedLogger {
+    fn enabled(&self, _metadata: &log::Metadata) -> bool {
+        true
+    }
+
+    fn log(&self, record: &log::Record) {
+        let mut logger = self.0.lock();
+        if record.level() == log::Level::Info {
+            writeln!(logger, "{}", record.args()).unwrap();
+        } else {
+            writeln!(logger, "{}: {}", record.level(), record.args()).unwrap();
+        }
+        logger.add_vspace(LOG_SPACING);
+    }
+
+    fn flush(&self) {}
+}
+
 pub struct Logger {
-    pub framebuffer: &'static mut [u8],
-    pub info: FrameBufferInfo,
+    framebuffer: &'static mut [u8],
+    info: FrameBufferInfo,
     x_pos: usize,
     y_pos: usize,
 }
 
 impl Logger {
-    /// Creates a new logger that uses the given framebuffer.
     pub fn new(framebuffer: &'static mut [u8], info: FrameBufferInfo) -> Self {
         let mut logger = Self {
             framebuffer,
@@ -44,7 +79,14 @@ impl Logger {
         self.x_pos = 0;
     }
 
-    /// Erases all text on the screen.
+    pub fn remove_last(&mut self, n: usize) {
+        self.x_pos -= n * 8;
+        for _ in 0..n {
+            self.write_char(' ');
+        }
+        self.x_pos -= n * 8;
+    }
+
     pub fn clear(&mut self) {
         self.x_pos = 0;
         self.y_pos = 0;
@@ -84,7 +126,6 @@ impl Logger {
         }
     }
 
-    // write centered string
     pub fn write_centered_string(&mut self, s: &str) {
         self.x_pos = (self.width() - s.len() * 8) / 2;
         self.write_string(s);
