@@ -112,7 +112,7 @@ impl Logger {
                 if self.y_pos >= (self.height() - 8) {
                     self.clear();
                 }
-                let rendered = font8x8::BASIC_FONTS
+                let rendered = crate::font::FONTS
                     .get(c)
                     .expect("character not found in basic font");
                 self.write_rendered_char(rendered);

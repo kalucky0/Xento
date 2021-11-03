@@ -16,6 +16,7 @@ pub mod memory;
 pub mod serial;
 pub mod task;
 pub mod logger;
+pub mod font;
 
 pub fn init() {
     // GDT initialization causes double fault so it's commented out for now
