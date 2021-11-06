@@ -1,7 +1,10 @@
-use font8x8::{legacy::BASIC_LEGACY, legacy::CONTROL_LEGACY, legacy::LATIN_LEGACY, FontUnicode, UnicodeFonts};
+use font8x8::{legacy::BASIC_LEGACY,
+    legacy::CONTROL_LEGACY,
+    legacy::BLOCK_LEGACY,
+    legacy::LATIN_LEGACY, FontUnicode, UnicodeFonts};
 use core::fmt;
 
-pub const UNICODE: [FontUnicode; 256] = [
+pub const UNICODE: [FontUnicode; 288] = [
     FontUnicode('\u{0000}', BASIC_LEGACY[0]),
     FontUnicode('\u{0001}', BASIC_LEGACY[1]),
     FontUnicode('\u{0002}', BASIC_LEGACY[2]),
@@ -258,10 +261,42 @@ pub const UNICODE: [FontUnicode; 256] = [
     FontUnicode('\u{00FD}', LATIN_LEGACY[93]),
     FontUnicode('\u{00FE}', LATIN_LEGACY[94]),
     FontUnicode('\u{00FF}', LATIN_LEGACY[95]),
+    FontUnicode('\u{2580}', BLOCK_LEGACY[0]),
+    FontUnicode('\u{2581}', BLOCK_LEGACY[1]),
+    FontUnicode('\u{2582}', BLOCK_LEGACY[2]),
+    FontUnicode('\u{2583}', BLOCK_LEGACY[3]),
+    FontUnicode('\u{2584}', BLOCK_LEGACY[4]),
+    FontUnicode('\u{2585}', BLOCK_LEGACY[5]),
+    FontUnicode('\u{2586}', BLOCK_LEGACY[6]),
+    FontUnicode('\u{2587}', BLOCK_LEGACY[7]),
+    FontUnicode('\u{2588}', BLOCK_LEGACY[8]),
+    FontUnicode('\u{2589}', BLOCK_LEGACY[9]),
+    FontUnicode('\u{258A}', BLOCK_LEGACY[10]),
+    FontUnicode('\u{258B}', BLOCK_LEGACY[11]),
+    FontUnicode('\u{258C}', BLOCK_LEGACY[12]),
+    FontUnicode('\u{258D}', BLOCK_LEGACY[13]),
+    FontUnicode('\u{258E}', BLOCK_LEGACY[14]),
+    FontUnicode('\u{258F}', BLOCK_LEGACY[15]),
+    FontUnicode('\u{2590}', BLOCK_LEGACY[16]),
+    FontUnicode('\u{2591}', BLOCK_LEGACY[17]),
+    FontUnicode('\u{2592}', BLOCK_LEGACY[18]),
+    FontUnicode('\u{2593}', BLOCK_LEGACY[19]),
+    FontUnicode('\u{2594}', BLOCK_LEGACY[20]),
+    FontUnicode('\u{2595}', BLOCK_LEGACY[21]),
+    FontUnicode('\u{2596}', BLOCK_LEGACY[22]),
+    FontUnicode('\u{2597}', BLOCK_LEGACY[23]),
+    FontUnicode('\u{2598}', BLOCK_LEGACY[24]),
+    FontUnicode('\u{2599}', BLOCK_LEGACY[25]),
+    FontUnicode('\u{259A}', BLOCK_LEGACY[26]),
+    FontUnicode('\u{259B}', BLOCK_LEGACY[27]),
+    FontUnicode('\u{259C}', BLOCK_LEGACY[28]),
+    FontUnicode('\u{259D}', BLOCK_LEGACY[29]),
+    FontUnicode('\u{259E}', BLOCK_LEGACY[30]),
+    FontUnicode('\u{259F}', BLOCK_LEGACY[31]),
 ];
 
 pub const FONTS: BasicFonts = BasicFonts(UNICODE);
-pub struct BasicFonts([FontUnicode; 256]);
+pub struct BasicFonts([FontUnicode; 288]);
 
 impl fmt::Debug for BasicFonts {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
