@@ -17,13 +17,14 @@ pub mod serial;
 pub mod task;
 pub mod logger;
 pub mod font;
+pub mod pic;
 
 pub fn init() {
-    // GDT initialization causes double fault so it's commented out for now
+    // GDT initialization causes General Protection Fault so it's commented out for now
+    // No idea why it happens tho
     // gdt::init();
     interrupts::init_idt();
-    unsafe { interrupts::PICS.lock().initialize() };
-    x86_64::instructions::interrupts::enable();
+    pic::init();
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
