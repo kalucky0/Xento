@@ -5,11 +5,11 @@ extern crate alloc;
 extern crate font8x8;
 extern crate log;
 
-use tk_os::task::{executor::Executor, keyboard, Task};
-use bootloader::boot_info::{FrameBufferInfo};
+use bootloader::boot_info::FrameBufferInfo;
 use bootloader::{entry_point, BootInfo};
 use tk_os::init_logger;
-use tk_os::logger::{LockedLogger};
+use tk_os::logger::LockedLogger;
+use tk_os::task::{executor::Executor, keyboard, Task};
 
 entry_point!(kernel_main);
 
