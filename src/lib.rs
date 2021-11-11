@@ -18,6 +18,9 @@ pub mod task;
 pub mod logger;
 pub mod font;
 pub mod pic;
+pub mod cmos;
+pub mod clock;
+pub mod time;
 
 pub fn init() {
     // GDT initialization causes General Protection Fault so it's commented out for now
@@ -25,6 +28,8 @@ pub fn init() {
     // gdt::init();
     interrupts::init_idt();
     pic::init();
+
+    time::init();
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
