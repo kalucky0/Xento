@@ -5,13 +5,13 @@ use core::{
     ptr,
 };
 use font8x8::UnicodeFonts;
-use spinning_top::{Spinlock, RawSpinlock};
+use spinning_top::{RawSpinlock, Spinlock};
 
 pub static LOGGER: OnceCell<LockedLogger> = OnceCell::uninit();
 pub struct LockedLogger(Spinlock<Logger>);
 
 /// Additional vertical space between lines
-const LINE_SPACING: usize = 0;
+const LINE_SPACING: usize = 2;
 /// Additional vertical space between separate log messages
 const LOG_SPACING: usize = 2;
 
@@ -52,6 +52,14 @@ pub struct Logger {
     info: FrameBufferInfo,
     x_pos: usize,
     y_pos: usize,
+    color: Color,
+    should_clear: bool,
+}
+
+pub struct Color {
+    pub r: u8,
+    pub g: u8,
+    pub b: u8,
 }
 
 impl Logger {
@@ -61,6 +69,8 @@ impl Logger {
             info,
             x_pos: 0,
             y_pos: 0,
+            color: Color { r: 74, g: 246, b: 38 },
+            should_clear: true,
         };
         logger.clear();
         logger
@@ -71,8 +81,20 @@ impl Logger {
         self.carriage_return()
     }
 
-    fn add_vspace(&mut self, space: usize) {
+    pub fn add_vspace(&mut self, space: usize) {
         self.y_pos += space;
+    }
+
+    pub fn sub_vspace(&mut self, space: usize) {
+        self.y_pos -= space;
+    }
+
+    pub fn set_hspace(&mut self, space: usize) {
+        self.x_pos = space;
+    }
+
+    pub fn should_clear(&mut self, should_clear: bool) {
+        self.should_clear = should_clear;
     }
 
     fn carriage_return(&mut self) {
@@ -85,6 +107,10 @@ impl Logger {
             self.write_char(' ');
         }
         self.x_pos -= n * 8;
+    }
+
+    pub fn set_text_color(&mut self, color: Color) {
+        self.color = color;
     }
 
     pub fn clear(&mut self) {
@@ -142,12 +168,25 @@ impl Logger {
     }
 
     fn write_pixel(&mut self, x: usize, y: usize, intensity: u8) {
+        if !self.should_clear && intensity == 0 {
+            return;
+        }
+
         let pixel_offset = y * self.info.stride + x;
-        let color = match self.info.pixel_format {
-            PixelFormat::RGB => [intensity / 2, intensity, intensity / 2, 0],
-            PixelFormat::BGR => [intensity / 2, intensity, intensity / 2, 0],
-            PixelFormat::U8 => [if intensity > 200 { 0xf } else { 0 }, 0, 0, 0],
-            _ => [if intensity > 200 { 0xf } else { 0 }, 0, 0, 0],
+        let color = if intensity != 0 {
+            match self.info.pixel_format {
+                PixelFormat::RGB => [self.color.r, self.color.g, self.color.b, 0],
+                PixelFormat::BGR => [self.color.b, self.color.g, self.color.r, 0],
+                PixelFormat::U8 => [self.color.r, self.color.g, self.color.b, 0],
+                _ => [self.color.r, self.color.g, self.color.b, 0],
+            }
+        } else {
+            match self.info.pixel_format {
+                PixelFormat::RGB => [0, 0, 0, 0],
+                PixelFormat::BGR => [0, 0, 0, 0],
+                PixelFormat::U8 => [0, 0, 0, 0],
+                _ => [0, 0, 0, 0],
+            }
         };
         let bytes_per_pixel = self.info.bytes_per_pixel;
         let byte_offset = pixel_offset * bytes_per_pixel;
