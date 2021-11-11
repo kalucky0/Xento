@@ -94,7 +94,7 @@ pub async fn print_keypresses() {
     let mut keyboard = Keyboard::new(layouts::Us104Key, ScancodeSet1, HandleControl::Ignore);
 
     let mut current_command = String::from("");
-    let mut prev_commands = Vec::from(["".to_string()]);
+    let mut prev_commands = Vec::from([String::from("")]);
     let mut selected_command = 0;
 
     if let Some(logger) = LOGGER.get() {
@@ -112,7 +112,7 @@ pub async fn print_keypresses() {
                                 let cmds = current_command.split(';');
                                 print_char(logger, '\n');
                                 for cmd in cmds {
-                                    let result: &str = &parse_command(cmd.to_string());
+                                    let result: &str = &parse_command(cmd.to_string(), logger);
                                     print_string(logger, result);
                                 }
                                 print_string(logger, "\n > ");
