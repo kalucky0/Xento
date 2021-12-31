@@ -7,8 +7,8 @@ extern crate log;
 
 use bootloader::boot_info::FrameBufferInfo;
 use bootloader::{entry_point, BootInfo};
-use tk_os::init_logger;
-use tk_os::logger::LockedLogger;
+use tk_os::init_renderer;
+use tk_os::renderer::LockedRenderer;
 use tk_os::task::{executor::Executor, keyboard, Task};
 
 entry_point!(kernel_main);
@@ -22,9 +22,6 @@ fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
 
     if let Some(framebuffer) = boot_info.framebuffer.as_mut() {
         let info: FrameBufferInfo = framebuffer.info();
-        let logger = init_logger(framebuffer.buffer_mut(), info);
-
-        intro(logger);
 
         if let Some(physical_memory_offset) = boot_info.physical_memory_offset.as_mut() {
             let phys_mem_offset = VirtAddr::new(*physical_memory_offset);
@@ -39,6 +36,9 @@ fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
             log::error!("Could not find physical memory offset");
         }
 
+        let renderer = init_renderer(framebuffer.buffer_mut(), info);
+        intro(renderer);
+
         let mut executor = Executor::new();
         executor.spawn(Task::new(keyboard::print_keypresses()));
         executor.run();
@@ -47,13 +47,13 @@ fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
     loop {}
 }
 
-fn intro(l: &LockedLogger) {
-    let mut logger = l.lock();
-    logger.write_char('\n');
-    logger.write_centered_string("KAL INDUSTRIES TERAKRAFT OPERATING SYSTEM\n");
-    logger.write_centered_string("COPYRIGHT 2020-2022 KAL INDUSTRIES\n");
-    logger.write_centered_string("-Server 6-");
-    logger.write_char('\n');
-    logger.write_char('\n');
-    logger.write_string("\n > ");
+fn intro(r: &LockedRenderer) {
+    let mut renderer = r.lock();
+    renderer.write_char('\n');
+    renderer.write_centered_string("KAL INDUSTRIES TERAKRAFT OPERATING SYSTEM\n");
+    renderer.write_centered_string("COPYRIGHT 2020-2022 KAL INDUSTRIES\n");
+    renderer.write_centered_string("-Server 6-");
+    renderer.write_char('\n');
+    renderer.write_char('\n');
+    renderer.write_string("\n > ");
 }

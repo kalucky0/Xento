@@ -15,7 +15,7 @@ pub mod interrupts;
 pub mod memory;
 pub mod serial;
 pub mod task;
-pub mod logger;
+pub mod renderer;
 pub mod font;
 pub mod pic;
 pub mod cmos;
@@ -54,11 +54,11 @@ pub fn hlt_loop() -> ! {
     }
 }
 
-pub fn init_logger(framebuffer: &'static mut [u8], info: FrameBufferInfo) -> &logger::LockedLogger {
-    let logger = logger::LOGGER.get_or_init(move || logger::LockedLogger::new(framebuffer, info));
-    log::set_logger(logger).expect("logger already set");
+pub fn init_renderer(framebuffer: &'static mut [u8], info: FrameBufferInfo) -> &renderer::LockedRenderer {
+    let renderer = renderer::RENDERER.get_or_init(move || renderer::LockedRenderer::new(framebuffer, info));
+    log::set_logger(renderer).expect("renderer already set");
     log::set_max_level(log::LevelFilter::Trace);
-    logger
+    renderer
 }
 
 #[panic_handler]

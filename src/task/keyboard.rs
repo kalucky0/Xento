@@ -1,5 +1,5 @@
 use super::terminal::parse_command;
-use crate::logger::{LockedLogger, LOGGER};
+use crate::renderer::{LockedRenderer, RENDERER};
 use crate::serial_println;
 use alloc::string::{String, ToString};
 use alloc::vec::Vec;
@@ -69,24 +69,24 @@ impl Stream for ScancodeStream {
     }
 }
 
-fn print_char(l: &LockedLogger, s: char) {
-    let mut logger = l.lock();
-    logger.write_char(s);
+fn print_char(r: &LockedRenderer, s: char) {
+    let mut renderer = r.lock();
+    renderer.write_char(s);
 }
 
-fn print_string(l: &LockedLogger, s: &str) {
-    let mut logger = l.lock();
-    logger.write_string(s);
+fn print_string(r: &LockedRenderer, s: &str) {
+    let mut renderer = r.lock();
+    renderer.write_string(s);
 }
 
-fn remove_last(l: &LockedLogger) {
-    let mut logger = l.lock();
-    logger.remove_last(1);
+fn remove_last(r: &LockedRenderer) {
+    let mut renderer = r.lock();
+    renderer.remove_last(1);
 }
 
-fn clear_row(l: &LockedLogger, cmd: String) {
-    let mut logger = l.lock();
-    logger.remove_last(cmd.len());
+fn clear_row(r: &LockedRenderer, cmd: String) {
+    let mut renderer = r.lock();
+    renderer.remove_last(cmd.len());
 }
 
 pub async fn print_keypresses() {
@@ -97,7 +97,7 @@ pub async fn print_keypresses() {
     let mut prev_commands = Vec::from([String::from("")]);
     let mut selected_command = 0;
 
-    if let Some(logger) = LOGGER.get() {
+    if let Some(renderer) = RENDERER.get() {
         while let Some(scancode) = scancodes.next().await {
             if let Ok(Some(key_event)) = keyboard.add_byte(scancode) {
                 if let Some(key) = keyboard.process_keyevent(key_event) {
@@ -105,22 +105,22 @@ pub async fn print_keypresses() {
                         DecodedKey::Unicode(character) => {
                             if character as u8 == 8 {
                                 if current_command.len() > 0 {
-                                    remove_last(logger);
+                                    remove_last(renderer);
                                     current_command.pop();
                                 }
                             } else if character as u8 == 10 {
                                 let cmds = current_command.split(';');
-                                print_char(logger, '\n');
+                                print_char(renderer, '\n');
                                 for cmd in cmds {
-                                    let result: &str = &parse_command(cmd.to_string(), logger);
-                                    print_string(logger, result);
+                                    let result: &str = &parse_command(cmd.to_string(), renderer);
+                                    print_string(renderer, result);
                                 }
-                                print_string(logger, "\n > ");
+                                print_string(renderer, "\n > ");
                                 prev_commands.insert(0, current_command.clone());
                                 current_command = String::from("");
                             } else {
                                 current_command += &character.to_string();
-                                print_char(logger, character);
+                                print_char(renderer, character);
                             }
                         }
                         DecodedKey::RawKey(key) => {
@@ -129,14 +129,14 @@ pub async fn print_keypresses() {
                                 if current_command != "" {
                                     selected_command += 1;
                                 }
-                                clear_row(logger, current_command);
+                                clear_row(renderer, current_command);
                                 current_command = prev_commands.get(selected_command).unwrap().clone();
-                                print_string(logger, current_command.as_str());
+                                print_string(renderer, current_command.as_str());
                             } else if key == KeyCode::ArrowDown && selected_command >= 1 {
                                 selected_command -= 1;
-                                clear_row(logger, current_command);
+                                clear_row(renderer, current_command);
                                 current_command = prev_commands.get(selected_command).unwrap().clone();
-                                print_string(logger, current_command.as_str());
+                                print_string(renderer, current_command.as_str());
                             } else {
                             }
                         }

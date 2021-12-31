@@ -1,3 +1,5 @@
+use alloc::vec;
+use alloc::vec::Vec;
 use bootloader::boot_info::{FrameBufferInfo, PixelFormat};
 use conquer_once::spin::OnceCell;
 use core::{
@@ -7,20 +9,20 @@ use core::{
 use font8x8::UnicodeFonts;
 use spinning_top::{RawSpinlock, Spinlock};
 
-pub static LOGGER: OnceCell<LockedLogger> = OnceCell::uninit();
-pub struct LockedLogger(Spinlock<Logger>);
+pub static RENDERER: OnceCell<LockedRenderer> = OnceCell::uninit();
+pub struct LockedRenderer(Spinlock<Renderer>);
 
 /// Additional vertical space between lines
 const LINE_SPACING: usize = 2;
 /// Additional vertical space between separate log messages
 const LOG_SPACING: usize = 2;
 
-impl LockedLogger {
+impl LockedRenderer {
     pub fn new(framebuffer: &'static mut [u8], info: FrameBufferInfo) -> Self {
-        LockedLogger(Spinlock::new(Logger::new(framebuffer, info)))
+        LockedRenderer(Spinlock::new(Renderer::new(framebuffer, info)))
     }
 
-    pub fn lock(&self) -> spinning_top::lock_api::MutexGuard<'_, RawSpinlock, Logger> {
+    pub fn lock(&self) -> spinning_top::lock_api::MutexGuard<'_, RawSpinlock, Renderer> {
         self.0.lock()
     }
 
@@ -29,25 +31,25 @@ impl LockedLogger {
     }
 }
 
-impl log::Log for LockedLogger {
+impl log::Log for LockedRenderer {
     fn enabled(&self, _metadata: &log::Metadata) -> bool {
         true
     }
 
     fn log(&self, record: &log::Record) {
-        let mut logger = self.0.lock();
+        let mut renderer = self.0.lock();
         if record.level() == log::Level::Info {
-            writeln!(logger, "{}", record.args()).unwrap();
+            writeln!(renderer, "{}", record.args()).unwrap();
         } else {
-            writeln!(logger, "{}: {}", record.level(), record.args()).unwrap();
+            writeln!(renderer, "{}: {}", record.level(), record.args()).unwrap();
         }
-        logger.add_vspace(LOG_SPACING);
+        renderer.add_vspace(LOG_SPACING);
     }
 
     fn flush(&self) {}
 }
 
-pub struct Logger {
+pub struct Renderer {
     framebuffer: &'static mut [u8],
     info: FrameBufferInfo,
     x_pos: usize,
@@ -62,18 +64,22 @@ pub struct Color {
     pub b: u8,
 }
 
-impl Logger {
+impl Renderer {
     pub fn new(framebuffer: &'static mut [u8], info: FrameBufferInfo) -> Self {
-        let mut logger = Self {
+        let mut renderer = Self {
             framebuffer,
             info,
             x_pos: 0,
             y_pos: 0,
-            color: Color { r: 74, g: 246, b: 38 },
+            color: Color {
+                r: 74,
+                g: 246,
+                b: 38,
+            },
             should_clear: true,
         };
-        logger.clear();
-        logger
+        renderer.clear();
+        renderer
     }
 
     fn newline(&mut self) {
@@ -87,6 +93,18 @@ impl Logger {
 
     pub fn sub_vspace(&mut self, space: usize) {
         self.y_pos -= space;
+    }
+
+    pub fn set_vspace(&mut self, space: usize) {
+        self.y_pos = space;
+    }
+
+    pub fn add_hspace(&mut self, space: usize) {
+        self.x_pos += space;
+    }
+
+    pub fn sub_hspace(&mut self, space: usize) {
+        self.x_pos -= space;
     }
 
     pub fn set_hspace(&mut self, space: usize) {
@@ -196,10 +214,10 @@ impl Logger {
     }
 }
 
-unsafe impl Send for Logger {}
-unsafe impl Sync for Logger {}
+unsafe impl Send for Renderer {}
+unsafe impl Sync for Renderer {}
 
-impl fmt::Write for Logger {
+impl fmt::Write for Renderer {
     fn write_str(&mut self, s: &str) -> fmt::Result {
         for c in s.chars() {
             self.write_char(c);
