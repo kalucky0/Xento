@@ -45,6 +45,8 @@ fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
         let renderer = init_renderer(framebuffer.buffer_mut(), info);
         intro(renderer);
 
+        let terminal = init_terminal(renderer);
+
         let mut executor = Executor::new();
         executor.spawn(Task::new(keyboard::print_keypresses()));
         executor.run();

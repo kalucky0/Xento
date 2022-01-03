@@ -4,10 +4,12 @@
 #![feature(alloc_error_handler)]
 #![feature(const_mut_refs)]
 #![feature(asm)]
+#![feature(exclusive_range_pattern)]
 
 extern crate alloc;
 use core::panic::PanicInfo;
 use bootloader::boot_info::{FrameBufferInfo};
+use crate::task::terminal;
 
 pub mod allocator;
 pub mod gdt;
@@ -59,6 +61,12 @@ pub fn init_renderer(framebuffer: &'static mut [u8], info: FrameBufferInfo) -> &
     log::set_logger(renderer).expect("renderer already set");
     log::set_max_level(log::LevelFilter::Trace);
     renderer
+}
+
+pub fn init_terminal(renderer: &'static renderer::LockedRenderer) -> &terminal::LockedTerminal {
+    let terminal = terminal::TERMINAL.get_or_init(move || terminal::LockedTerminal::new(renderer));
+    terminal.init_events();
+    terminal
 }
 
 #[panic_handler]
