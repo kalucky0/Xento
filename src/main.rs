@@ -5,11 +5,18 @@ extern crate alloc;
 extern crate font8x8;
 extern crate log;
 
+use alloc::string::{String, ToString};
 use bootloader::boot_info::FrameBufferInfo;
 use bootloader::{entry_point, BootInfo};
-use tk_os::init_renderer;
+use embedded_graphics::{
+    mono_font::{ascii::FONT_8X13_BOLD, MonoTextStyle},
+    pixelcolor::{Rgb888, RgbColor},
+    prelude::*,
+    text::{Alignment, Text},
+};
 use tk_os::renderer::LockedRenderer;
 use tk_os::task::{executor::Executor, keyboard, Task};
+use tk_os::{init_renderer, init_terminal};
 
 entry_point!(kernel_main);
 
@@ -31,7 +38,6 @@ fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
 
             allocator::init_heap(&mut mapper, &mut frame_allocator)
                 .expect("heap initialization failed");
-
         } else {
             log::error!("Could not find physical memory offset");
         }
@@ -49,11 +55,26 @@ fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
 
 fn intro(r: &LockedRenderer) {
     let mut renderer = r.lock();
-    renderer.write_char('\n');
-    renderer.write_centered_string("KAL INDUSTRIES TERAKRAFT OPERATING SYSTEM\n");
-    renderer.write_centered_string("COPYRIGHT 2020-2022 KAL INDUSTRIES\n");
-    renderer.write_centered_string("-Server 6-");
-    renderer.write_char('\n');
-    renderer.write_char('\n');
-    renderer.write_string("\n > ");
+    let style = MonoTextStyle::new(&FONT_8X13_BOLD, Rgb888::WHITE);
+    let mut text = String::new();
+
+    text.push('\n');
+    text.push_str("KAL INDUSTRIES TERAKRAFT OPERATING SYSTEM");
+    text.push('\n');
+    text.push_str("COPYRIGHT 2020-2022 KAL INDUSTRIES");
+    text.push('\n');
+    text.push_str("-Server 6-");
+    text.push('\n');
+    text.push('\n');
+
+    Text::with_alignment(
+        &text,
+        Point::new((renderer.width() as i32) / 2, 0),
+        style,
+        Alignment::Center,
+    )
+    .draw(renderer.get())
+    .unwrap();
+
+    renderer.update();
 }
