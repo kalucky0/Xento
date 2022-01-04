@@ -1,6 +1,6 @@
+use crate::hlt_loop;
 use crate::pic;
 use crate::serial_println;
-use crate::{gdt, hlt_loop};
 use lazy_static::lazy_static;
 use spin::Mutex;
 use x86_64::instructions;
@@ -12,6 +12,10 @@ const PIC2: u16 = 0xA1;
 
 pub const PIC_1_OFFSET: u8 = 32;
 pub const PIC_2_OFFSET: u8 = PIC_1_OFFSET + 8;
+
+pub const DOUBLE_FAULT_IST_INDEX: u16 = 0;
+pub const PAGE_FAULT_IST_INDEX: u16 = 1;
+pub const GENERAL_PROTECTION_FAULT_IST_INDEX: u16 = 2;
 
 #[derive(Debug, Clone, Copy)]
 #[repr(u8)]
@@ -54,13 +58,13 @@ lazy_static! {
         unsafe {
             idt.double_fault
                 .set_handler_fn(double_fault_handler)
-                .set_stack_index(gdt::DOUBLE_FAULT_IST_INDEX);
+                .set_stack_index(DOUBLE_FAULT_IST_INDEX);
             idt.page_fault
                 .set_handler_fn(page_fault_handler)
-                .set_stack_index(gdt::PAGE_FAULT_IST_INDEX);
+                .set_stack_index(PAGE_FAULT_IST_INDEX);
             idt.general_protection_fault
                 .set_handler_fn(general_protection_fault_handler)
-                .set_stack_index(gdt::GENERAL_PROTECTION_FAULT_IST_INDEX);
+                .set_stack_index(GENERAL_PROTECTION_FAULT_IST_INDEX);
         }
         idt.stack_segment_fault
             .set_handler_fn(stack_segment_fault_handler);
@@ -68,7 +72,20 @@ lazy_static! {
             .set_handler_fn(segment_not_present_handler);
         idt[InterruptIndex::Timer.as_usize()].set_handler_fn(irq0_handler);
         idt[InterruptIndex::Keyboard.as_usize()].set_handler_fn(keyboard_interrupt_handler);
+        idt[InterruptIndex::Cascade.as_usize()].set_handler_fn(irq2_handler);
+        idt[InterruptIndex::COM2.as_usize()].set_handler_fn(irq3_handler);
+        idt[InterruptIndex::COM1.as_usize()].set_handler_fn(irq4_handler);
+        idt[InterruptIndex::LPT2.as_usize()].set_handler_fn(irq5_handler);
+        idt[InterruptIndex::FloppyDisk.as_usize()].set_handler_fn(irq6_handler);
+        idt[InterruptIndex::LPT1.as_usize()].set_handler_fn(irq7_handler);
         idt[InterruptIndex::RTC.as_usize()].set_handler_fn(irq8_handler);
+        idt[InterruptIndex::Peripherals1.as_usize()].set_handler_fn(irq9_handler);
+        idt[InterruptIndex::Peripherals2.as_usize()].set_handler_fn(irq10_handler);
+        idt[InterruptIndex::Peripherals3.as_usize()].set_handler_fn(irq11_handler);
+        idt[InterruptIndex::PS2.as_usize()].set_handler_fn(irq12_handler);
+        idt[InterruptIndex::FPU.as_usize()].set_handler_fn(irq13_handler);
+        idt[InterruptIndex::PrimaryATA.as_usize()].set_handler_fn(irq14_handler);
+        idt[InterruptIndex::SecondaryATA.as_usize()].set_handler_fn(irq15_handler);
         idt
     };
 }
@@ -147,7 +164,20 @@ macro_rules! irq_handler {
 }
 
 irq_handler!(irq0_handler, InterruptIndex::Timer.as_u8());
+irq_handler!(irq2_handler, InterruptIndex::Cascade.as_u8());
+irq_handler!(irq3_handler, InterruptIndex::COM2.as_u8());
+irq_handler!(irq4_handler, InterruptIndex::COM1.as_u8());
+irq_handler!(irq5_handler, InterruptIndex::LPT2.as_u8());
+irq_handler!(irq6_handler, InterruptIndex::FloppyDisk.as_u8());
+irq_handler!(irq7_handler, InterruptIndex::LPT1.as_u8());
 irq_handler!(irq8_handler, InterruptIndex::RTC.as_u8());
+irq_handler!(irq9_handler, InterruptIndex::Peripherals1.as_u8());
+irq_handler!(irq10_handler, InterruptIndex::Peripherals2.as_u8());
+irq_handler!(irq11_handler, InterruptIndex::Peripherals3.as_u8());
+irq_handler!(irq12_handler, InterruptIndex::PS2.as_u8());
+irq_handler!(irq13_handler, InterruptIndex::FPU.as_u8());
+irq_handler!(irq14_handler, InterruptIndex::PrimaryATA.as_u8());
+irq_handler!(irq15_handler, InterruptIndex::SecondaryATA.as_u8());
 
 pub fn set_irq_handler(irq: u8, handler: fn()) {
     instructions::interrupts::without_interrupts(|| {

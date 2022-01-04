@@ -7,27 +7,24 @@
 #![feature(exclusive_range_pattern)]
 
 extern crate alloc;
-use core::panic::PanicInfo;
-use bootloader::boot_info::{FrameBufferInfo};
 use crate::task::terminal;
+use alloc::string::String;
+use bootloader::boot_info::FrameBufferInfo;
+use core::panic::PanicInfo;
 
 pub mod allocator;
-pub mod gdt;
+pub mod clock;
+pub mod cmos;
+pub mod font;
 pub mod interrupts;
 pub mod memory;
+pub mod pic;
+pub mod renderer;
 pub mod serial;
 pub mod task;
-pub mod renderer;
-pub mod font;
-pub mod pic;
-pub mod cmos;
-pub mod clock;
 pub mod time;
 
 pub fn init() {
-    // GDT initialization causes General Protection Fault so it's commented out for now
-    // No idea why it happens tho
-    // gdt::init();
     interrupts::init_idt();
     pic::init();
 
@@ -56,8 +53,12 @@ pub fn hlt_loop() -> ! {
     }
 }
 
-pub fn init_renderer(framebuffer: &'static mut [u8], info: FrameBufferInfo) -> &renderer::LockedRenderer {
-    let renderer = renderer::RENDERER.get_or_init(move || renderer::LockedRenderer::new(framebuffer, info));
+pub fn init_renderer(
+    framebuffer: &'static mut [u8],
+    info: FrameBufferInfo,
+) -> &renderer::LockedRenderer {
+    let renderer =
+        renderer::RENDERER.get_or_init(move || renderer::LockedRenderer::new(framebuffer, info));
     log::set_logger(renderer).expect("renderer already set");
     log::set_max_level(log::LevelFilter::Trace);
     renderer
@@ -67,6 +68,17 @@ pub fn init_terminal(renderer: &'static renderer::LockedRenderer) -> &terminal::
     let terminal = terminal::TERMINAL.get_or_init(move || terminal::LockedTerminal::new(renderer));
     terminal.init_events();
     terminal
+}
+
+pub fn binary_to_text(binary: &[u8]) -> String {
+    let mut text = String::new();
+    for byte in binary {
+        if *byte == 0 {
+            break;
+        }
+        text.push(*byte as char);
+    }
+    text
 }
 
 #[panic_handler]
