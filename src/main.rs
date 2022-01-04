@@ -5,7 +5,7 @@ extern crate alloc;
 extern crate font8x8;
 extern crate log;
 
-use alloc::string::{String, ToString};
+use alloc::string::String;
 use bootloader::boot_info::FrameBufferInfo;
 use bootloader::{entry_point, BootInfo};
 use embedded_graphics::{
@@ -45,7 +45,7 @@ fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
         let renderer = init_renderer(framebuffer.buffer_mut(), info);
         intro(renderer);
 
-        let terminal = init_terminal(renderer);
+        let _terminal = init_terminal(renderer);
 
         let mut executor = Executor::new();
         executor.spawn(Task::new(keyboard::print_keypresses()));

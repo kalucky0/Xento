@@ -26,8 +26,9 @@ pub mod time;
 
 pub fn init() {
     interrupts::init_idt();
-    pic::init();
+    task::mouse::init();
 
+    pic::init();
     time::init();
 }
 

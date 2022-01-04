@@ -4,7 +4,7 @@ use crate::serial_println;
 use lazy_static::lazy_static;
 use spin::Mutex;
 use x86_64::instructions;
-use x86_64::instructions::port::Port;
+use x86_64::instructions::port::{Port, PortReadOnly};
 use x86_64::structures::idt::{InterruptDescriptorTable, InterruptStackFrame, PageFaultErrorCode};
 
 const PIC1: u16 = 0x21;
@@ -82,7 +82,7 @@ lazy_static! {
         idt[InterruptIndex::Peripherals1.as_usize()].set_handler_fn(irq9_handler);
         idt[InterruptIndex::Peripherals2.as_usize()].set_handler_fn(irq10_handler);
         idt[InterruptIndex::Peripherals3.as_usize()].set_handler_fn(irq11_handler);
-        idt[InterruptIndex::PS2.as_usize()].set_handler_fn(irq12_handler);
+        idt[InterruptIndex::PS2.as_usize()].set_handler_fn(mouse_interrupt_handler);
         idt[InterruptIndex::FPU.as_usize()].set_handler_fn(irq13_handler);
         idt[InterruptIndex::PrimaryATA.as_usize()].set_handler_fn(irq14_handler);
         idt[InterruptIndex::SecondaryATA.as_usize()].set_handler_fn(irq15_handler);
@@ -151,6 +151,17 @@ extern "x86-interrupt" fn keyboard_interrupt_handler(_stack_frame: InterruptStac
     }
 }
 
+extern "x86-interrupt" fn mouse_interrupt_handler(_stack_frame: InterruptStackFrame) {
+    let mut port = PortReadOnly::new(0x60);
+    let packet = unsafe { port.read() };
+    crate::task::mouse::MOUSE.lock().process_packet(packet);
+
+    unsafe {
+        pic::PICS.lock()
+            .notify_end_of_interrupt(InterruptIndex::PS2.as_u8());
+    }
+}
+
 macro_rules! irq_handler {
     ($handler:ident, $irq:expr) => {
         pub extern "x86-interrupt" fn $handler(_stack_frame: InterruptStackFrame) {
@@ -174,7 +185,6 @@ irq_handler!(irq8_handler, InterruptIndex::RTC.as_u8());
 irq_handler!(irq9_handler, InterruptIndex::Peripherals1.as_u8());
 irq_handler!(irq10_handler, InterruptIndex::Peripherals2.as_u8());
 irq_handler!(irq11_handler, InterruptIndex::Peripherals3.as_u8());
-irq_handler!(irq12_handler, InterruptIndex::PS2.as_u8());
 irq_handler!(irq13_handler, InterruptIndex::FPU.as_u8());
 irq_handler!(irq14_handler, InterruptIndex::PrimaryATA.as_u8());
 irq_handler!(irq15_handler, InterruptIndex::SecondaryATA.as_u8());
