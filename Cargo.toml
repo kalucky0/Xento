@@ -1,6 +1,6 @@
 [package]
 name = "tk_os"
-version = "0.0.2"
+version = "2022.1.1"
 authors = ["kalucky0 <kalucki23@gmail.com>"]
 edition = "2021"
 
@@ -10,12 +10,12 @@ members = [
 ]
 
 [dependencies]
-bootloader = "0.10.10"
-bit_field = "0.10.0"
+bootloader = "0.10.12"
+bit_field = "0.10.1"
 volatile = "0.2.7"
 spin = "0.6.0"
-x86_64 = "0.14.7"
-uart_16550 = "0.2.15"
+x86_64 = "0.14.8"
+uart_16550 = "0.2.16"
 pic8259 = "0.10.2"
 pc-keyboard = "0.5.1"
 linked_list_allocator = "0.9.1"
@@ -23,14 +23,16 @@ log = "0.4.14"
 spinning_top = "0.2.4"
 embedded-graphics = "0.7.1"
 ps2-mouse = "0.1.4"
-time = { version = "0.3.5", default-features = false }
-font8x8 = { version = "0.2.5", default-features = false, features = ["unicode"] }
+hashbrown = "0.12.0"
+tinytga = "0.4.1"
+time = { version = "0.3.7", default-features = false }
+font8x8 = { version = "0.3.1", default-features = false, features = ["unicode"] }
 
 [package.metadata.bootloader]
 map-physical-memory = true
 
 [dependencies.lazy_static]
-version = "1.0"
+version = "1.4"
 features = ["spin_no_std"]
 
 [dependencies.crossbeam-queue]
@@ -43,6 +45,6 @@ version = "0.2.1"
 default-features = false
 
 [dependencies.futures-util]
-version = "0.3.4"
+version = "0.3.21"
 default-features = false
 features = ["alloc"]

@@ -8,9 +8,24 @@
 
 Xento aims to be a modern and elegant 64-bit operating currently targeted at the x86 family of processors.
 
-
-
 Based on [phil-opp/blog_os](https://github.com/phil-opp/blog_os)
+
+## Commands
+
+Building:
+```
+cargo kbuild
+```
+
+Running in QEMU:
+```
+cargo krun
+```
+
+Burning img file onto USB
+```
+sudo dd bs=4M if=target/x86_64-tk_os/release/boot-uefi-tk_os.img of=/dev/sdb conv=fdatasync status=progress
+```
 
 ## Contributing
 
@@ -22,5 +37,5 @@ Contributions are always welcome!
 - Push to the Branch (`git push origin feature/NewFeature`)
 - Open a Pull Request
 
-# License
+## License
 Xento is licensed under the MIT license. See [license](https://github.com/kalucky0/Xento/blob/master/LICENSE.md) for more details.

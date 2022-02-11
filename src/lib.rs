@@ -3,7 +3,6 @@
 #![feature(abi_x86_interrupt)]
 #![feature(alloc_error_handler)]
 #![feature(const_mut_refs)]
-#![feature(asm)]
 #![feature(exclusive_range_pattern)]
 
 extern crate alloc;
@@ -15,7 +14,6 @@ use core::panic::PanicInfo;
 pub mod allocator;
 pub mod clock;
 pub mod cmos;
-pub mod font;
 pub mod interrupts;
 pub mod memory;
 pub mod pic;
