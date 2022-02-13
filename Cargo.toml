@@ -22,6 +22,7 @@ linked_list_allocator = "0.9.1"
 log = "0.4.14"
 spinning_top = "0.2.4"
 embedded-graphics = "0.7.1"
+embedded-layout = "0.2.0"
 ps2-mouse = "0.1.4"
 hashbrown = "0.12.0"
 tinytga = "0.4.1"
@@ -30,8 +31,8 @@ font8x8 = { version = "0.3.1", default-features = false, features = ["unicode"] 
 
 [package.metadata.bootloader]
 map-physical-memory = true
-minimum-framebuffer-width = 1366
-minimum-framebuffer-height = 768
+minimum-framebuffer-height = 682
+minimum-framebuffer-width = 1024
 
 [dependencies.lazy_static]
 version = "1.4"

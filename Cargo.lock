@@ -138,6 +138,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "embedded-layout"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7adbc16ba694006a121bce08a8935186d16cb008a4c9e20c5e346517ad1e0ac8"
+dependencies = [
+ "embedded-graphics",
+ "embedded-layout-macros",
+]
+
+[[package]]
+name = "embedded-layout-macros"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "352186cee85e4cf9104c42b4dfd0295a22901c5d2bf0c26efd47265adcf1c52d"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "float-cmp"
 version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -333,6 +354,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8b870d8c151b6f2fb93e84a13146138f05d02ed11c7e7c54f8826aaaf7c9f184"
 
 [[package]]
+name = "proc-macro2"
+version = "1.0.36"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c7342d5883fbccae1cc37a2353b09c87c9b0f3afd73f5fb9bba687a1f733b029"
+dependencies = [
+ "unicode-xid",
+]
+
+[[package]]
 name = "ps2-mouse"
 version = "0.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -340,6 +370,15 @@ checksum = "f7a1ea62fa77d411155c765d1ba9d0286b8af83a93cda6109c295a2bde1e04a0"
 dependencies = [
  "bitflags",
  "x86_64",
+]
+
+[[package]]
+name = "quote"
+version = "1.0.15"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "864d3e96a899863136fc6e99f3d7cae289dafe43bf2c5ac19b70df7210c0a145"
+dependencies = [
+ "proc-macro2",
 ]
 
 [[package]]
@@ -367,6 +406,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "75adad84ee84b521fb2cca2d4fd0f1dab1d8d026bda3c5bea4ca63b5f9f9293c"
 dependencies = [
  "lock_api",
+]
+
+[[package]]
+name = "syn"
+version = "1.0.86"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8a65b3f4ffa0092e9887669db0eae07941f023991ab58ea44da8fe8e2d511c6b"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "unicode-xid",
 ]
 
 [[package]]
@@ -398,6 +448,7 @@ dependencies = [
  "conquer-once",
  "crossbeam-queue",
  "embedded-graphics",
+ "embedded-layout",
  "font8x8",
  "futures-util",
  "hashbrown",
@@ -425,6 +476,12 @@ dependencies = [
  "bitflags",
  "x86_64",
 ]
+
+[[package]]
+name = "unicode-xid"
+version = "0.2.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8ccb82d61f80a663efe1f787a51b16b5a51e3314d6ac365b08639f52387b33f3"
 
 [[package]]
 name = "version_check"

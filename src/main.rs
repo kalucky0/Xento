@@ -9,7 +9,7 @@ use bootloader::boot_info::FrameBufferInfo;
 use bootloader::{entry_point, BootInfo};
 use tk_os::renderer::LockedRenderer;
 use tk_os::task::{executor::Executor, keyboard, Task};
-use tk_os::{gui, init_renderer, init_terminal};
+use tk_os::{gui, init_renderer};
 
 entry_point!(kernel_main);
 
@@ -41,9 +41,10 @@ fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
 
         tk_os::sec_init();
 
-        tk_os::time::sleep(4.0);
+        // tk_os::time::sleep(4.0);
 
-        clear_screen(renderer);
+        let mut desktop = gui::Desktop::new(renderer);
+        desktop.start();
 
         // let _terminal = init_terminal(renderer);
 
@@ -53,10 +54,4 @@ fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
     }
 
     loop {}
-}
-
-fn clear_screen(r: &LockedRenderer) {
-    let mut renderer = r.lock();
-    renderer.fill(tk_os::renderer::Color::new(27, 29, 37));
-    renderer.update();
 }

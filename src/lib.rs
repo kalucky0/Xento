@@ -6,7 +6,7 @@
 #![feature(exclusive_range_pattern)]
 
 extern crate alloc;
-use crate::task::terminal;
+// use crate::task::terminal;
 use alloc::string::String;
 use bootloader::boot_info::FrameBufferInfo;
 use core::panic::PanicInfo;
