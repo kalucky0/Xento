@@ -142,6 +142,10 @@ impl Renderer {
         self
     }
 
+    pub fn info(&self) -> &FrameBufferInfo {
+        &self.info
+    }
+
     pub fn clear(&mut self) {
         self.buffer.fill(0);
     }

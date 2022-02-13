@@ -21,9 +21,13 @@ pub mod renderer;
 pub mod serial;
 pub mod task;
 pub mod time;
+pub mod gui;
 
 pub fn init() {
     interrupts::init_idt();
+}
+
+pub fn sec_init() {
     task::mouse::init();
 
     pic::init();
@@ -63,11 +67,11 @@ pub fn init_renderer(
     renderer
 }
 
-pub fn init_terminal(renderer: &'static renderer::LockedRenderer) -> &terminal::LockedTerminal {
-    let terminal = terminal::TERMINAL.get_or_init(move || terminal::LockedTerminal::new(renderer));
-    terminal.init_events();
-    terminal
-}
+// pub fn init_terminal(renderer: &'static renderer::LockedRenderer) -> &terminal::LockedTerminal {
+//     let terminal = terminal::TERMINAL.get_or_init(move || terminal::LockedTerminal::new(renderer));
+//     terminal.init_events();
+//     terminal
+// }
 
 pub fn binary_to_text(binary: &[u8]) -> String {
     let mut text = String::new();
