@@ -7,17 +7,17 @@ extern crate log;
 
 use bootloader::boot_info::FrameBufferInfo;
 use bootloader::{entry_point, BootInfo};
-use tk_os::task::{executor::Executor, keyboard, Task};
-use tk_os::{gui, init_renderer};
+use xento::task::{executor::Executor, keyboard, Task};
+use xento::{gui, init_renderer};
 
 entry_point!(kernel_main);
 
 fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
-    use tk_os::allocator;
-    use tk_os::memory::{self, BootInfoFrameAllocator};
+    use xento::allocator;
+    use xento::memory::{self, BootInfoFrameAllocator};
     use x86_64::VirtAddr;
 
-    tk_os::init();
+    xento::init();
 
     if let Some(framebuffer) = boot_info.framebuffer.as_mut() {
         let info: FrameBufferInfo = framebuffer.info();
@@ -38,9 +38,9 @@ fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
 
         gui::splash::show(renderer);
 
-        tk_os::sec_init();
+        xento::sec_init();
 
-        tk_os::time::sleep(4.0);
+        xento::time::sleep(4.0);
 
         let mut desktop = gui::Desktop::new(renderer);
         desktop.start();

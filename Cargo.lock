@@ -475,36 +475,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "tk_os"
-version = "2022.1.1"
-dependencies = [
- "bit_field",
- "bootloader",
- "conquer-once",
- "crossbeam-queue",
- "embedded-graphics",
- "embedded-layout",
- "font8x8",
- "futures-util",
- "hashbrown",
- "lazy_static",
- "libm",
- "linked_list_allocator",
- "log",
- "pc-keyboard",
- "pic8259",
- "ps2-mouse",
- "rusttype",
- "spin 0.6.0",
- "spinning_top",
- "time",
- "tinytga",
- "uart_16550",
- "volatile 0.2.7",
- "x86_64",
-]
-
-[[package]]
 name = "ttf-parser"
 version = "0.6.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -559,4 +529,34 @@ dependencies = [
  "bit_field",
  "bitflags",
  "volatile 0.4.4",
+]
+
+[[package]]
+name = "xento"
+version = "2022.1.1"
+dependencies = [
+ "bit_field",
+ "bootloader",
+ "conquer-once",
+ "crossbeam-queue",
+ "embedded-graphics",
+ "embedded-layout",
+ "font8x8",
+ "futures-util",
+ "hashbrown",
+ "lazy_static",
+ "libm",
+ "linked_list_allocator",
+ "log",
+ "pc-keyboard",
+ "pic8259",
+ "ps2-mouse",
+ "rusttype",
+ "spin 0.6.0",
+ "spinning_top",
+ "time",
+ "tinytga",
+ "uart_16550",
+ "volatile 0.2.7",
+ "x86_64",
 ]

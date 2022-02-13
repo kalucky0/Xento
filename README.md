@@ -24,7 +24,7 @@ cargo krun
 
 Burning img file onto USB
 ```
-sudo dd bs=4M if=target/x86_64-tk_os/release/boot-uefi-tk_os.img of=/dev/sdb conv=fdatasync status=progress
+sudo dd bs=4M if=target/x86_64-xento/release/boot-uefi-xento.img of=/dev/sdb conv=fdatasync status=progress
 ```
 
 ## Contributing
