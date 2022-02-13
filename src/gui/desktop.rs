@@ -1,3 +1,5 @@
+use alloc::vec::Vec;
+use alloc::vec;
 use crate::renderer::{LockedRenderer};
 use embedded_graphics::{
     image::{Image, ImageRaw},
@@ -83,14 +85,14 @@ impl Desktop {
             .stroke_width(1)
             .build();
 
-        // let (clock_u8, clock_width) = self.clock("19:21:21");
-        // let clock_raw = ImageRaw::<Rgb888>::new(&clock_u8, clock_width);
+        let (clock_u8, clock_width) = self.clock("19:21:21");
+        let clock_raw = ImageRaw::<Rgb888>::new(&clock_u8, clock_width);
 
         let system_panel = LinearLayout::vertical(
             Chain::new(title_bar("PANEL", "SYSTEM", 11))
                 .append(title_bar(" ", " ", 2))
                 .append(space(1, 11))
-                // .append(Image::new(&clock_raw, Point::zero()))
+                .append(Image::new(&clock_raw, Point::zero()))
                 .append(title_bar(" ", " ", 2))
                 .append(
                     Rectangle::new(
@@ -142,5 +144,63 @@ impl Desktop {
             .unwrap();
 
         renderer.update();
+    }
+
+    pub fn clock(&self, time: &str) -> (Vec<u8>, u32) {
+        let font_data = include_bytes!("../resources/Roboto-Medium.ttf") as &[u8];
+        let font =
+            rusttype::Font::try_from_bytes(font_data as &[u8]).expect("Error constructing Font");
+
+        let scale = rusttype::Scale::uniform(36.0);
+        // let scale = rusttype::Scale::uniform(50.0);
+
+        let v_metrics = font.v_metrics(scale);
+
+        let glyphs: Vec<_> = font
+            .layout(time, scale, rusttype::point(0.0, v_metrics.ascent))
+            .collect();
+
+        let glyphs_height = libm::ceilf(v_metrics.ascent - v_metrics.descent) as u32;
+        let glyphs_width = {
+            let min_x = glyphs
+                .first()
+                .map(|g| g.pixel_bounding_box().unwrap().min.x)
+                .unwrap();
+            let max_x = glyphs
+                .last()
+                .map(|g| g.pixel_bounding_box().unwrap().max.x)
+                .unwrap();
+            (max_x - min_x) as u32
+        };
+
+        let mut img: Vec<u8> = vec![0; ((glyphs_width) * (glyphs_height) * 3) as usize];
+        let mut offset: u32 = 0;
+
+        for i in 0..glyphs_height * glyphs_width {
+            let offset = i as usize * 3;
+            img[offset as usize] = 27;
+            img[offset as usize + 1] = 29;
+            img[offset as usize + 2] = 37;
+        }
+
+        for glyph in glyphs {
+            if let Some(bounding_box) = glyph.pixel_bounding_box() {
+                glyph.draw(|x, y, v| {
+                    let _x = x + bounding_box.min.x as u32 - 16;
+                    if offset == 0 {
+                        offset = _x;
+                    }
+                    let _y = y + bounding_box.min.y as u32;
+                    let index: usize = (_y * glyphs_width + _x - offset) as usize * 3;
+                    if v > 0.03 {
+                        img[index] = (255.0 * v) as u8;
+                        img[index + 1] = (255.0 * v) as u8;
+                        img[index + 2] = (255.0 * v) as u8;
+                    }
+                });
+            }
+        }
+
+        (img, glyphs_width)
     }
 }

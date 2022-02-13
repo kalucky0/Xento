@@ -7,7 +7,6 @@ extern crate log;
 
 use bootloader::boot_info::FrameBufferInfo;
 use bootloader::{entry_point, BootInfo};
-use tk_os::renderer::LockedRenderer;
 use tk_os::task::{executor::Executor, keyboard, Task};
 use tk_os::{gui, init_renderer};
 
@@ -41,7 +40,7 @@ fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
 
         tk_os::sec_init();
 
-        // tk_os::time::sleep(4.0);
+        tk_os::time::sleep(4.0);
 
         let mut desktop = gui::Desktop::new(renderer);
         desktop.start();
