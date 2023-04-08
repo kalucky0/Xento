@@ -1,6 +1,6 @@
 [package]
 name = "xento"
-version = "2022.1.1"
+version = "2023.1.0"
 authors = ["kalucky0 <kalucki23@gmail.com>"]
 edition = "2021"
 
@@ -10,26 +10,26 @@ members = [
 ]
 
 [dependencies]
-bootloader = "0.10.12"
-bit_field = "0.10.1"
-volatile = "0.2.7"
-spin = "0.6.0"
-x86_64 = "0.14.8"
-uart_16550 = "0.2.16"
-pic8259 = "0.10.2"
-pc-keyboard = "0.5.1"
-linked_list_allocator = "0.9.1"
-log = "0.4.14"
-spinning_top = "0.2.4"
-embedded-graphics = "0.7.1"
-embedded-layout = "0.2.0"
-ps2-mouse = "0.1.4"
-hashbrown = "0.12.0"
-tinytga = "0.4.1"
-libm = "0.2.2"
-rusttype = { version = "0.9.2", default-features = false, features = ["libm-math"]  }
-time = { version = "0.3.7", default-features = false }
-font8x8 = { version = "0.3.1", default-features = false, features = ["unicode"] }
+bootloader = "0.10"
+bit_field = "0.10"
+volatile = "0.4"
+spin = "0.9"
+x86_64 = "0.14"
+uart_16550 = "0.2"
+pic8259 = "0.10"
+pc-keyboard = "0.5"
+linked_list_allocator = "0.9"
+log = "0.4"
+spinning_top = "0.2"
+embedded-graphics = "0.7"
+embedded-layout = "0.2"
+ps2-mouse = "0.1"
+hashbrown = "0.13"
+tinytga = "0.4"
+libm = "0.2"
+rusttype = { version = "0.9", default-features = false, features = ["libm-math"]  }
+time = { version = "0.3", default-features = false }
+font8x8 = { version = "0.3", default-features = false, features = ["unicode"] }
 
 [package.metadata.bootloader]
 map-physical-memory = true
@@ -40,15 +40,15 @@ version = "1.4"
 features = ["spin_no_std"]
 
 [dependencies.crossbeam-queue]
-version = "0.2.3"
+version = "0.2"
 default-features = false
 features = ["alloc"]
 
 [dependencies.conquer-once]
-version = "0.2.1"
+version = "0.3"
 default-features = false
 
 [dependencies.futures-util]
-version = "0.3.21"
+version = "0.3"
 default-features = false
 features = ["alloc"]
