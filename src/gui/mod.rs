@@ -1,4 +1,2 @@
+pub mod widgets;
 pub mod splash;
-mod desktop;
-
-pub use desktop::Desktop;

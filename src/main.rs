@@ -2,22 +2,22 @@
 #![no_main]
 
 extern crate alloc;
-extern crate font8x8;
 extern crate log;
 
-use bootloader::boot_info::FrameBufferInfo;
-use bootloader::{entry_point, BootInfo};
-use xento::task::{executor::Executor, keyboard, Task};
-use xento::{gui, init_renderer};
+use bootloader::{boot_info::FrameBufferInfo, entry_point, BootInfo};
+use xento::{
+    gui, init_renderer,
+    task::{executor::Executor, keyboard, Task},
+};
 
 entry_point!(kernel_main);
 
 fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
+    use x86_64::VirtAddr;
     use xento::allocator;
     use xento::memory::{self, BootInfoFrameAllocator};
-    use x86_64::VirtAddr;
 
-    xento::init();
+    xento::interrupts::init_idt();
 
     if let Some(framebuffer) = boot_info.framebuffer.as_mut() {
         let info: FrameBufferInfo = framebuffer.info();
@@ -38,14 +38,7 @@ fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
 
         gui::splash::show(renderer);
 
-        xento::sec_init();
-
-        xento::time::sleep(4.0);
-
-        let mut desktop = gui::Desktop::new(renderer);
-        desktop.start();
-
-        // let _terminal = init_terminal(renderer);
+        xento::init();
 
         let mut executor = Executor::new();
         executor.spawn(Task::new(keyboard::print_keypresses()));

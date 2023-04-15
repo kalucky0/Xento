@@ -4,3 +4,4 @@ target/
 .vscode
 .idea
 qemu.log
+.DS_Store

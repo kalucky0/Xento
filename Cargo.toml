@@ -10,26 +10,23 @@ members = [
 ]
 
 [dependencies]
-bootloader = "0.10"
 bit_field = "0.10"
-volatile = "0.4"
-spin = "0.9"
-x86_64 = "0.14"
-uart_16550 = "0.2"
-pic8259 = "0.10"
-pc-keyboard = "0.5"
+bootloader = "0.10"
+fontdue = { version = "0.7", default-features = false }
+hashbrown = "0.13"
+libm = "0.2"
 linked_list_allocator = "0.9"
 log = "0.4"
-spinning_top = "0.2"
-embedded-graphics = "0.7"
-embedded-layout = "0.2"
+pc-keyboard = "0.5"
+pic8259 = "0.10"
 ps2-mouse = "0.1"
-hashbrown = "0.13"
-tinytga = "0.4"
-libm = "0.2"
-rusttype = { version = "0.9", default-features = false, features = ["libm-math"]  }
+spin = "0.9"
+spinning_top = "0.2"
 time = { version = "0.3", default-features = false }
-font8x8 = { version = "0.3", default-features = false, features = ["unicode"] }
+tiny-skia = { version = "0.8", default-features = false, features = ["no-std-float" ] }
+uart_16550 = "0.2"
+volatile = "0.4"
+x86_64 = "0.14"
 
 [package.metadata.bootloader]
 map-physical-memory = true
