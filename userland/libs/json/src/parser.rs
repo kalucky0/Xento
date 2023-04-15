@@ -2,21 +2,20 @@ use crate::value::{JsonNumber, JsonValue};
 use alloc::{
     format,
     string::{String, ToString},
-    vec,
     vec::Vec,
 };
 
-struct JsonParser<'a> {
+pub struct JsonParser<'a> {
     input: &'a str,
     pos: usize,
 }
 
 impl<'a> JsonParser<'a> {
-    fn new(input: &'a str) -> Self {
+    pub fn new(input: &'a str) -> Self {
         JsonParser { input, pos: 0 }
     }
 
-    fn parse_value(&mut self) -> Result<JsonValue, String> {
+    pub fn parse_value(&mut self) -> Result<JsonValue, String> {
         match self.peek_char() {
             Some('n') => self.parse_null(),
             Some('t') | Some('f') => self.parse_boolean(),
@@ -236,81 +235,90 @@ impl<'a> JsonParser<'a> {
     }
 }
 
-#[test]
-fn test_parse_null() {
-    let mut decoder = JsonParser::new("null");
-    assert_eq!(decoder.parse_value().unwrap(), JsonValue::Null);
-}
+#[cfg(test)]
+mod tests {
+    use crate::{
+        parser::JsonParser,
+        value::{JsonNumber, JsonValue},
+    };
+    use alloc::{string::ToString, vec};
 
-#[test]
-fn test_parse_boolean_true() {
-    let mut decoder = JsonParser::new("true");
-    assert_eq!(decoder.parse_value().unwrap(), JsonValue::Boolean(true));
-}
+    #[test]
+    fn test_parse_null() {
+        let mut decoder = JsonParser::new("null");
+        assert_eq!(decoder.parse_value().unwrap(), JsonValue::Null);
+    }
 
-#[test]
-fn test_parse_boolean_false() {
-    let mut decoder = JsonParser::new("false");
-    assert_eq!(decoder.parse_value().unwrap(), JsonValue::Boolean(false));
-}
+    #[test]
+    fn test_parse_boolean_true() {
+        let mut decoder = JsonParser::new("true");
+        assert_eq!(decoder.parse_value().unwrap(), JsonValue::Boolean(true));
+    }
 
-#[test]
-fn test_parse_number_integer() {
-    let mut decoder = JsonParser::new("42");
-    assert_eq!(
-        decoder.parse_value().unwrap(),
-        JsonValue::Number(JsonNumber::Integer(42))
-    );
-}
+    #[test]
+    fn test_parse_boolean_false() {
+        let mut decoder = JsonParser::new("false");
+        assert_eq!(decoder.parse_value().unwrap(), JsonValue::Boolean(false));
+    }
 
-#[test]
-fn test_parse_number_negative_integer() {
-    let mut decoder = JsonParser::new("-42");
-    assert_eq!(
-        decoder.parse_value().unwrap(),
-        JsonValue::Number(JsonNumber::Integer(-42))
-    );
-}
+    #[test]
+    fn test_parse_number_integer() {
+        let mut decoder = JsonParser::new("42");
+        assert_eq!(
+            decoder.parse_value().unwrap(),
+            JsonValue::Number(JsonNumber::Integer(42))
+        );
+    }
 
-#[test]
-fn test_parse_number_float() {
-    let mut decoder = JsonParser::new("3.14");
-    assert_eq!(
-        decoder.parse_value().unwrap(),
-        JsonValue::Number(JsonNumber::Float(3.14))
-    );
-}
+    #[test]
+    fn test_parse_number_negative_integer() {
+        let mut decoder = JsonParser::new("-42");
+        assert_eq!(
+            decoder.parse_value().unwrap(),
+            JsonValue::Number(JsonNumber::Integer(-42))
+        );
+    }
 
-#[test]
-fn test_parse_string() {
-    let mut decoder = JsonParser::new("\"hello\"");
-    assert_eq!(
-        decoder.parse_value().unwrap(),
-        JsonValue::String("hello".to_string())
-    );
-}
+    #[test]
+    fn test_parse_number_float() {
+        let mut decoder = JsonParser::new("3.14");
+        assert_eq!(
+            decoder.parse_value().unwrap(),
+            JsonValue::Number(JsonNumber::Float(3.14))
+        );
+    }
 
-#[test]
-fn test_parse_array() {
-    let mut decoder = JsonParser::new("[1, 2, 3]");
-    assert_eq!(
-        decoder.parse_value().unwrap(),
-        JsonValue::Array(vec![
-            JsonValue::Number(JsonNumber::Integer(1)),
-            JsonValue::Number(JsonNumber::Integer(2)),
-            JsonValue::Number(JsonNumber::Integer(3)),
-        ])
-    );
-}
+    #[test]
+    fn test_parse_string() {
+        let mut decoder = JsonParser::new("\"hello\"");
+        assert_eq!(
+            decoder.parse_value().unwrap(),
+            JsonValue::String("hello".to_string())
+        );
+    }
 
-#[test]
-fn test_parse_object() {
-    let mut decoder = JsonParser::new("{\"foo\": 1, \"bar\": true}");
-    assert_eq!(
-        decoder.parse_value().unwrap(),
-        JsonValue::Object(vec![
-            ("foo".to_string(), JsonValue::Number(JsonNumber::Integer(1))),
-            ("bar".to_string(), JsonValue::Boolean(true)),
-        ])
-    );
+    #[test]
+    fn test_parse_array() {
+        let mut decoder = JsonParser::new("[1, 2, 3]");
+        assert_eq!(
+            decoder.parse_value().unwrap(),
+            JsonValue::Array(vec![
+                JsonValue::Number(JsonNumber::Integer(1)),
+                JsonValue::Number(JsonNumber::Integer(2)),
+                JsonValue::Number(JsonNumber::Integer(3)),
+            ])
+        );
+    }
+
+    #[test]
+    fn test_parse_object() {
+        let mut decoder = JsonParser::new("{\"foo\": 1, \"bar\": true}");
+        assert_eq!(
+            decoder.parse_value().unwrap(),
+            JsonValue::Object(vec![
+                ("foo".to_string(), JsonValue::Number(JsonNumber::Integer(1))),
+                ("bar".to_string(), JsonValue::Boolean(true)),
+            ])
+        );
+    }
 }
