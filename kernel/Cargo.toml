@@ -29,12 +29,12 @@ version = "1.4"
 features = ["spin_no_std"]
 
 [dependencies.crossbeam-queue]
-version = "0.2"
+version = "0.3"
 default-features = false
 features = ["alloc"]
 
 [dependencies.conquer-once]
-version = "0.3"
+version = "0.4"
 default-features = false
 
 [dependencies.futures-util]
