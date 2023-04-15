@@ -201,6 +201,31 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "078e285eafdfb6c4b434e0d31e8cfcb5115b651496faca5749b88fafd4f23bfd"
 
 [[package]]
+name = "kernel"
+version = "2023.1.0"
+dependencies = [
+ "bit_field",
+ "bootloader",
+ "conquer-once",
+ "crossbeam-queue",
+ "futures-util",
+ "hashbrown 0.13.2",
+ "lazy_static",
+ "linked_list_allocator",
+ "log",
+ "pc-keyboard",
+ "pic8259",
+ "ps2-mouse",
+ "spin 0.9.8",
+ "spinning_top",
+ "time",
+ "uart_16550",
+ "userland",
+ "volatile",
+ "x86_64",
+]
+
+[[package]]
 name = "lazy_static"
 version = "1.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -278,9 +303,9 @@ checksum = "5c6f2d937e3b8d63449b01401e2bae4041bc9dd1129c2e3e0d239407cf6635ac"
 
 [[package]]
 name = "pic8259"
-version = "0.10.3"
+version = "0.10.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "761e92187c0fc0c3db574a512609df5fd99b0ee237132858281d68a0cdc189c8"
+checksum = "cb844b5b01db1e0b17938685738f113bfc903846f18932b378bc0eabfa40e194"
 dependencies = [
  "x86_64",
 ]
@@ -407,6 +432,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "userland"
+version = "2023.1.0"
+dependencies = [
+ "conquer-once",
+ "fontdue",
+ "spinning_top",
+ "tiny-skia",
+]
+
+[[package]]
 name = "version_check"
 version = "0.9.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -440,25 +475,6 @@ dependencies = [
 name = "xento"
 version = "2023.1.0"
 dependencies = [
- "bit_field",
  "bootloader",
- "conquer-once",
- "crossbeam-queue",
- "fontdue",
- "futures-util",
- "hashbrown 0.13.2",
- "lazy_static",
- "libm",
- "linked_list_allocator",
- "log",
- "pc-keyboard",
- "pic8259",
- "ps2-mouse",
- "spin 0.9.8",
- "spinning_top",
- "time",
- "tiny-skia",
- "uart_16550",
- "volatile",
- "x86_64",
+ "kernel",
 ]

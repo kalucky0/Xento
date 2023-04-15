@@ -1,11 +1,13 @@
-use crate::hlt_loop;
-use crate::pic;
-use crate::serial_println;
+use crate::{hlt_loop, pic, serial_println};
 use lazy_static::lazy_static;
 use spin::Mutex;
-use x86_64::instructions;
-use x86_64::instructions::port::{Port, PortReadOnly};
-use x86_64::structures::idt::{InterruptDescriptorTable, InterruptStackFrame, PageFaultErrorCode};
+use x86_64::{
+    instructions::{
+        self,
+        port::{Port, PortReadOnly},
+    },
+    structures::idt::{InterruptDescriptorTable, InterruptStackFrame, PageFaultErrorCode},
+};
 
 const PIC1: u16 = 0x21;
 const PIC2: u16 = 0xA1;
@@ -157,7 +159,8 @@ extern "x86-interrupt" fn mouse_interrupt_handler(_stack_frame: InterruptStackFr
     crate::task::mouse::MOUSE.lock().process_packet(packet);
 
     unsafe {
-        pic::PICS.lock()
+        pic::PICS
+            .lock()
             .notify_end_of_interrupt(InterruptIndex::PS2.as_u8());
     }
 }

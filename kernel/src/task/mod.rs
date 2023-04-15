@@ -10,8 +10,6 @@ pub mod executor;
 pub mod keyboard;
 pub mod mouse;
 pub mod simple_executor;
-// pub mod terminal;
-pub mod calculator;
 
 pub struct Task {
     id: TaskId,

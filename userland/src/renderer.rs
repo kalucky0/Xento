@@ -1,4 +1,3 @@
-use bootloader::boot_info::FrameBufferInfo;
 use conquer_once::spin::OnceCell;
 use spinning_top::{RawSpinlock, Spinlock};
 use tiny_skia::{Color, Pixmap};
@@ -7,8 +6,8 @@ pub static RENDERER: OnceCell<LockedRenderer> = OnceCell::uninit();
 pub struct LockedRenderer(Spinlock<Renderer>);
 
 impl LockedRenderer {
-    pub fn new(framebuffer: &'static mut [u8], info: FrameBufferInfo) -> Self {
-        LockedRenderer(Spinlock::new(Renderer::new(framebuffer, info)))
+    pub fn new(framebuffer: &'static mut [u8], width: usize, height: usize) -> Self {
+        LockedRenderer(Spinlock::new(Renderer::new(framebuffer, width, height)))
     }
 
     pub fn lock(&self) -> spinning_top::lock_api::MutexGuard<'_, RawSpinlock, Renderer> {
@@ -20,37 +19,21 @@ impl LockedRenderer {
     }
 }
 
-impl log::Log for LockedRenderer {
-    fn enabled(&self, _metadata: &log::Metadata) -> bool {
-        true
-    }
-
-    fn log(&self, record: &log::Record) {
-        // let mut renderer = self.0.lock();
-        // if record.level() == log::Level::Info {
-        // writeln!(renderer, "{}", record.args()).unwrap();
-        // } else {
-        // writeln!(renderer, "{}: {}", record.level(), record.args()).unwrap();
-        // }
-    }
-
-    fn flush(&self) {}
-}
-
 pub struct Renderer {
     framebuffer: &'static mut [u8],
     pixmap: Pixmap,
-    info: FrameBufferInfo,
+    width: u32,
+    height: u32,
 }
 
 impl Renderer {
-    pub fn new(framebuffer: &'static mut [u8], info: FrameBufferInfo) -> Self {
-        let width: u32 = match info.horizontal_resolution.try_into() {
+    pub fn new(framebuffer: &'static mut [u8], width: usize, height: usize) -> Self {
+        let width: u32 = match width.try_into() {
             Ok(width) => width,
             Err(_) => panic!("width too large"),
         };
 
-        let height: u32 = match info.vertical_resolution.try_into() {
+        let height: u32 = match height.try_into() {
             Ok(height) => height,
             Err(_) => panic!("height too large"),
         };
@@ -63,7 +46,8 @@ impl Renderer {
         let mut renderer = Self {
             framebuffer,
             pixmap,
-            info,
+            width,
+            height,
         };
         renderer.clear();
         renderer
@@ -71,10 +55,6 @@ impl Renderer {
 
     pub fn get(&mut self) -> &mut Self {
         self
-    }
-
-    pub fn info(&self) -> &FrameBufferInfo {
-        &self.info
     }
 
     pub fn clear(&mut self) {
@@ -97,12 +77,12 @@ impl Renderer {
         }
     }
 
-    pub fn width(&self) -> usize {
-        self.info.horizontal_resolution
+    pub fn width(&self) -> u32 {
+        self.width
     }
 
-    pub fn height(&self) -> usize {
-        self.info.vertical_resolution
+    pub fn height(&self) -> u32 {
+        self.height
     }
 
     pub fn pixmap(&mut self) -> &mut Pixmap {

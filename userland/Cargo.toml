@@ -1,0 +1,10 @@
+[package]
+name = "userland"
+version = "2023.1.0"
+edition = "2021"
+
+[dependencies]
+conquer-once = { version = "0.3", default-features = false }
+fontdue = { version = "0.7", default-features = false }
+spinning_top = "0.2"
+tiny-skia = { version = "0.8", default-features = false, features = ["no-std-float"] }

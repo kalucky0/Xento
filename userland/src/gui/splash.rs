@@ -1,10 +1,10 @@
 use super::widgets::text;
-use crate::renderer::LockedRenderer;
+use crate::{renderer::LockedRenderer, resources};
 use alloc::format;
 use fontdue::Font;
 use tiny_skia::{Color, PixmapPaint, Transform};
 
-pub fn show(renderer: &'static LockedRenderer) {
+pub fn render(renderer: &'static LockedRenderer) {
     let mut r = renderer.lock();
     let renderer = r.get();
 
@@ -16,13 +16,12 @@ pub fn show(renderer: &'static LockedRenderer) {
     let ver = format!(
         "Xento v{} ({}x{})",
         env!("CARGO_PKG_VERSION"),
-        renderer.info().horizontal_resolution,
-        renderer.info().vertical_resolution
+        renderer.width(),
+        renderer.height()
     );
 
     let paint = PixmapPaint::default();
-    const JETBRAINS_MONO: &[u8] = include_bytes!("../resources/JetBrainsMono-Bold.ttf");
-    let font = Font::from_bytes(JETBRAINS_MONO, fontdue::FontSettings::default()).unwrap();
+    let font = Font::from_bytes(resources::JETBRAINS_MONO_BOLD, fontdue::FontSettings::default()).unwrap();
     renderer.pixmap().draw_pixmap(
         12,
         height - 26,
