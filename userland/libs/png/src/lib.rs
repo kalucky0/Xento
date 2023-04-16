@@ -4,6 +4,7 @@ mod chunk_type;
 mod chunk;
 mod color_type;
 mod pixel_type;
+mod scanline_iter;
 mod transparency_chunk;
 
 pub use ancillary_chunks::AncillaryChunks;
