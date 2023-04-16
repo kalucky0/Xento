@@ -313,6 +313,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8b870d8c151b6f2fb93e84a13146138f05d02ed11c7e7c54f8826aaaf7c9f184"
 
 [[package]]
+name = "png"
+version = "0.1.0"
+
+[[package]]
 name = "ps2-mouse"
 version = "0.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -428,6 +432,7 @@ dependencies = [
  "conquer-once",
  "fontdue",
  "json 0.1.0",
+ "png",
  "spinning_top",
  "tiny-skia",
 ]
