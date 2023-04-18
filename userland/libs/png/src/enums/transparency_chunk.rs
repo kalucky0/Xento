@@ -1,4 +1,5 @@
-use crate::{Chunk, PixelType};
+use super::PixelType;
+use crate::Chunk;
 
 pub enum TransparencyChunk<'a> {
     Grayscale(u8),

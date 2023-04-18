@@ -1,4 +1,4 @@
-use crate::TransparencyChunk;
+use crate::enums::TransparencyChunk;
 
 pub struct AncillaryChunks<'a> {
     palette: Option<&'a [u8]>,

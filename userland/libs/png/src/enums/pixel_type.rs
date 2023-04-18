@@ -1,4 +1,4 @@
-use crate::{ColorType, BitDepth};
+use super::{ColorType, BitDepth};
 
 pub enum PixelType {
     Grayscale1,

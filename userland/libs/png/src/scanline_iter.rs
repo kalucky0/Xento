@@ -1,4 +1,4 @@
-use crate::{AncillaryChunks, PixelType};
+use crate::{AncillaryChunks, enums::PixelType};
 
 pub struct ScanlineIterator<'a> {
     extra_chunks: &'a AncillaryChunks<'a>,

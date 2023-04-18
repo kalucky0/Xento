@@ -1,4 +1,4 @@
-use crate::ChunkType;
+use crate::enums::ChunkType;
 
 pub struct Chunk<'a> {
     chunk_type: ChunkType,
