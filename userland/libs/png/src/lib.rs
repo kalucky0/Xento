@@ -1,3 +1,7 @@
+#![no_std]
+
+extern crate alloc;
+
 mod ancillary_chunks;
 mod chunk;
 mod enums;

@@ -15,6 +15,36 @@ impl<'a> Chunk<'a> {
         }
     }
 
+    pub fn read(bytes: &[u8]) -> Option<Chunk> {
+        if bytes.len() < 4 {
+            return None;
+        }
+
+        let len = u32::from_be_bytes([bytes[0], bytes[1], bytes[2], bytes[3]]) as usize;
+        let bytes = &bytes[4..];
+
+        if bytes.len() < len + 8 {
+            return None;
+        }
+
+        let chunk_type = ChunkType::new(&bytes[..4]);
+        let crc = u32::from_be_bytes([
+            bytes[len + 4],
+            bytes[len + 5],
+            bytes[len + 6],
+            bytes[len + 7],
+        ]);
+        let bytes: &[u8] = &bytes[..len + 4];
+
+        // TODO: Check CRC
+
+        Some(Chunk {
+            chunk_type,
+            data: &bytes[4..],
+            crc,
+        })
+    }
+
     pub fn byte_size(&self) -> usize {
         12 + self.data.len()
     }
