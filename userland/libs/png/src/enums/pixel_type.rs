@@ -1,5 +1,6 @@
 use super::{ColorType, BitDepth};
 
+#[derive(Clone, Copy)]
 pub enum PixelType {
     Grayscale1,
     Grayscale2,

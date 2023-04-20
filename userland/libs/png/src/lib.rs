@@ -7,6 +7,7 @@ mod chunk;
 mod enums;
 mod png_header;
 mod scanline_iter;
+mod scanlines;
 
 pub use ancillary_chunks::AncillaryChunks;
 pub use chunk::Chunk;

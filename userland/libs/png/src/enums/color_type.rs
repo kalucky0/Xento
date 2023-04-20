@@ -17,4 +17,14 @@ impl ColorType {
             _ => None,
         }
     }
+
+    pub fn sample_multiplier(&self) -> u8 {
+        match self {
+            ColorType::Grayscale => 1,
+            ColorType::Rgb => 3,
+            ColorType::Palette => 1,
+            ColorType::GrayscaleAlpha => 2,
+            ColorType::RgbAlpha => 4,
+        }
+    }
 }
