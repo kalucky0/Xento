@@ -207,14 +207,25 @@ impl AhciController {
             self.stop_cmd(port);
 
             // Allocate memory for command list (1K per port)
-            let cmdlist_base = alloc::alloc::alloc(
+            let cmdlist_ptr = alloc::alloc::alloc(
                 alloc::alloc::Layout::from_size_align(1024, 1024).unwrap()
-            ) as u64;
+            );
+            if cmdlist_ptr.is_null() {
+                serial_println!("AHCI: Failed to allocate command list for port {}", port_num);
+                return;
+            }
+            let cmdlist_base = cmdlist_ptr as u64;
             
             // Allocate memory for FIS (256 bytes per port)
-            let fis_base = alloc::alloc::alloc(
+            let fis_ptr = alloc::alloc::alloc(
                 alloc::alloc::Layout::from_size_align(256, 256).unwrap()
-            ) as u64;
+            );
+            if fis_ptr.is_null() {
+                serial_println!("AHCI: Failed to allocate FIS for port {}", port_num);
+                alloc::alloc::dealloc(cmdlist_ptr, alloc::alloc::Layout::from_size_align(1024, 1024).unwrap());
+                return;
+            }
+            let fis_base = fis_ptr as u64;
 
             write_volatile(&mut (*port).clb, cmdlist_base);
             write_volatile(&mut (*port).fb, fis_base);
@@ -230,9 +241,15 @@ impl AhciController {
                 (*header).prdtl = 8; // 8 PRDT entries per command
                 
                 // Allocate command table (256 bytes + 8*16 PRDT)
-                let cmdtbl = alloc::alloc::alloc(
+                let cmdtbl_ptr = alloc::alloc::alloc(
                     alloc::alloc::Layout::from_size_align(384, 128).unwrap()
-                ) as u64;
+                );
+                if cmdtbl_ptr.is_null() {
+                    serial_println!("AHCI: Failed to allocate command table {} for port {}", i, port_num);
+                    // Continue with other command tables
+                    continue;
+                }
+                let cmdtbl = cmdtbl_ptr as u64;
                 
                 write_volatile(&mut (*header).ctba, cmdtbl);
             }
@@ -310,6 +327,9 @@ impl AhciController {
             let cmdtbl = read_volatile(&(*header).ctba) as *mut HbaCmdTbl;
             
             // Setup PRDT
+            // NOTE: This assumes identity mapping between virtual and physical addresses.
+            // In a production system, we should use proper virtual-to-physical translation.
+            // For now, this works because the bootloader provides identity-mapped memory.
             let buf_phys = buf.as_ptr() as u64;
             (*cmdtbl).prdt_entry[0].dba = buf_phys;
             (*cmdtbl).prdt_entry[0].flags = ((count as u32 * 512) - 1) & 0x3FFFFF; // Byte count

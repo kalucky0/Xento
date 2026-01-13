@@ -3,7 +3,16 @@ use std::{
     process::Command,
 };
 
-const RUN_ARGS: &[&str] = &["--no-reboot", "-s", "-d", "int,cpu_reset,guest_errors", "-D", "qemu.log"];
+const RUN_ARGS: &[&str] = &[
+    "--no-reboot", 
+    "-s", 
+    "-d", "int,cpu_reset,guest_errors", 
+    "-D", "qemu.log",
+    "-serial", "stdio",
+    "-drive", "id=test,format=raw,file=/tmp/test_disk.img,if=none",
+    "-device", "ahci,id=ahci0",
+    "-device", "ide-hd,drive=test,bus=ahci0.0"
+];
 
 fn main() {
     let mut args = std::env::args().skip(1); // skip executable name
