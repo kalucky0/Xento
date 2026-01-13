@@ -8,11 +8,13 @@
 extern crate alloc;
 extern crate log;
 
+pub mod ahci;
 pub mod allocator;
 pub mod clock;
 pub mod cmos;
 pub mod interrupts;
 pub mod memory;
+pub mod pci;
 pub mod pic;
 pub mod serial;
 pub mod task;
@@ -68,6 +70,41 @@ fn init() {
 
     pic::init();
     time::init();
+    ahci::init();
+    
+    // Test SATA disk reading
+    test_sata_read();
+}
+
+fn test_sata_read() {
+    use alloc::vec;
+    
+    serial_println!("\n=== Testing SATA Disk Read ===");
+    
+    // Allocate buffer for one sector (512 bytes)
+    let mut buffer = vec![0u8; 512];
+    
+    match ahci::read_sectors(0, 1, &mut buffer) {
+        Ok(()) => {
+            serial_println!("Successfully read sector 0 from SATA disk!");
+            serial_println!("First 64 bytes:");
+            for i in 0..64 {
+                if i % 16 == 0 {
+                    serial_print!("\n{:04x}: ", i);
+                }
+                serial_print!("{:02x} ", buffer[i]);
+            }
+            serial_println!("\n");
+            
+            // Check for boot signature (0x55AA at end of boot sector)
+            if buffer[510] == 0x55 && buffer[511] == 0xAA {
+                serial_println!("Valid boot signature found: 0x55AA");
+            }
+        }
+        Err(e) => {
+            serial_println!("Failed to read from SATA disk: {}", e);
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
