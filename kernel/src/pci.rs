@@ -82,6 +82,11 @@ impl PciDevice {
 }
 
 /// Scan the PCI bus for devices
+/// NOTE: This performs a full bus scan (255 buses × 32 devices × 8 functions).
+/// In a production system, this could be optimized by:
+/// - Checking if a bus exists before scanning all devices
+/// - Using ACPI MCFG to determine valid bus ranges
+/// - Implementing early termination for empty buses
 pub fn scan_bus() -> alloc::vec::Vec<PciDevice> {
     use alloc::vec::Vec;
     

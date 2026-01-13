@@ -119,6 +119,9 @@ const HBA_PX_CMD_CR: u32 = 0x8000;
 const HBA_PORT_IPM_ACTIVE: u32 = 1;
 const HBA_PORT_DET_PRESENT: u32 = 3;
 
+// Port timeouts
+const PORT_TIMEOUT_CYCLES: u32 = 1000000;
+
 pub struct AhciController {
     abar: usize,
     ports: [Option<usize>; 32],
@@ -235,6 +238,9 @@ impl AhciController {
             write_volatile(&mut (*port).ie, 0);
 
             // Allocate command tables
+            // NOTE: Allocated memory is never explicitly freed as it's needed for the lifetime
+            // of the AHCI controller. In a production system, we should implement proper
+            // deinitialization and cleanup.
             let cmdheader = cmdlist_base as *mut HbaCmdHeader;
             for i in 0..32 {
                 let header = cmdheader.add(i);
@@ -360,7 +366,7 @@ impl AhciController {
                 if (tfd & 0x88) == 0 {
                     break;
                 }
-                if spin > 1000000 {
+                if spin > PORT_TIMEOUT_CYCLES {
                     return Err("Port hung");
                 }
                 spin += 1;
